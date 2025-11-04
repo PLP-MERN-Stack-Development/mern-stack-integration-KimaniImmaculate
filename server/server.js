@@ -11,6 +11,8 @@ const path = require('path');
 const postRoutes = require('./routes/posts');
 const categoryRoutes = require('./routes/categories');
 const authRoutes = require('./routes/auth');
+const errorHandler = require('./middleware/errorHandler');
+
 
 // Load environment variables
 dotenv.config();
@@ -24,9 +26,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // Log requests in development mode
 if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
@@ -39,20 +38,15 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/posts', postRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Root route
 app.get('/', (req, res) => {
   res.send('MERN Blog API is running');
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    success: false,
-    error: err.message || 'Server Error',
-  });
-});
+app.use(errorHandler);
+
 
 // Connect to MongoDB and start server
 mongoose
