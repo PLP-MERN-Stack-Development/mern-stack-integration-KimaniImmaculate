@@ -185,18 +185,9 @@ Edge cases
 
 ## Screenshots
 
-Add screenshots to the repository under `client/public/screenshots/` or a top-level `screenshots/` folder. Use the following markdown in this README to display them (replace file names):
-
 ![Home page](client/public/screenshots/home.png)
 ![New Post](client/public/screenshots/new-post.png)
 
-If you prefer, commit your screenshot files and I'll embed them into the README for you.
-
-## Security & housekeeping
-
-- Rotate database credentials if they were ever pushed publicly.
-- Add `server/.env` to `.gitignore` (it likely already is) and consider adding `client/.env` if you add client secrets.
-- Use a limited-permission DB user for development.
 
 ## Helpful commands
 
