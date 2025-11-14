@@ -53,22 +53,18 @@ export const postService = {
 
   // ✅ Create post — handles both JSON and FormData (for image upload)
   createPost: async (postData, hasImage = false) => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
-    const config = {
-      headers: {
-        "Content-Type": hasImage ? "multipart/form-data" : "application/json",
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-    };
+  const config = {
+    headers: {
+      'Content-Type': hasImage ? 'multipart/form-data' : 'application/json',
+      Authorization: token ? `Bearer ${token}` : '',
+    },
+  };
 
-    const res = await axios.post(
-      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/posts`,
-      postData,
-      config
-    );
-    return res.data;
-  },
+  const res = await api.post('/posts', postData, config);
+  return res.data;
+},
 };
 
 //
