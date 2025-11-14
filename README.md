@@ -183,9 +183,9 @@ Edge cases
 - File uploads limited to images and 5MB
 
 
-## Screenshots
+## Screenshots (To be further modified)
 
-![Home page](client/public/screenshots/home.png)
+![Home page](asset/blog.png)
 ![New Post](client/public/screenshots/new-post.png)
 
 
