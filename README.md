@@ -1,78 +1,209 @@
-# MERN Stack Integration Assignment
+# MERN Blog
 
-This assignment focuses on building a full-stack MERN (MongoDB, Express.js, React.js, Node.js) application that demonstrates seamless integration between front-end and back-end components.
+An educational MERN (MongoDB, Express, React, Node) blog project demonstrating a small production-like stack: JWT auth, posts with images, categories, comments, and a Vite React client.
 
-## Assignment Overview
+Directory layout (top-level):
 
-You will build a blog application with the following features:
-1. RESTful API with Express.js and MongoDB
-2. React front-end with component architecture
-3. Full CRUD functionality for blog posts
-4. User authentication and authorization
-5. Advanced features like image uploads and comments
+- `client/` — React (Vite) frontend
+- `server/` — Express API, Mongoose models, controllers, middleware, and upload handling
+- `uploads/` — static folder for uploaded images (served by server)
 
-## Project Structure
+Tech stack
+- Node.js + Express
+- MongoDB with Mongoose
+- React + Vite
+- JWT for authentication
+- Multer for file uploads
 
-```
-mern-blog/
-├── client/                 # React front-end
-│   ├── public/             # Static files
-│   ├── src/                # React source code
-│   │   ├── components/     # Reusable components
-│   │   ├── pages/          # Page components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── services/       # API services
-│   │   ├── context/        # React context providers
-│   │   └── App.jsx         # Main application component
-│   └── package.json        # Client dependencies
-├── server/                 # Express.js back-end
-│   ├── config/             # Configuration files
-│   ├── controllers/        # Route controllers
-│   ├── models/             # Mongoose models
-│   ├── routes/             # API routes
-│   ├── middleware/         # Custom middleware
-│   ├── utils/              # Utility functions
-│   ├── server.js           # Main server file
-│   └── package.json        # Server dependencies
-└── README.md               # Project documentation
-```
+Quick links
+- Server code: `server/`
+- Client code: `client/`
+- Environment: `server/.env` (not tracked)
 
-## Getting Started
+## Project overview
 
-1. Accept the GitHub Classroom assignment invitation
-2. Clone your personal repository that was created by GitHub Classroom
-3. Follow the setup instructions in the `Week4-Assignment.md` file
-4. Complete the tasks outlined in the assignment
+This project implements a blog API and a React frontend. Users can register and log in, create posts (with optional image upload), browse posts with pagination and search, comment on posts, and manage categories.
 
-## Files Included
+Primary goals:
+- Demonstrate full-stack integration and common patterns (auth, file upload, relationships)
+- Serve as a learning/example repository
 
-- `Week4-Assignment.md`: Detailed assignment instructions
-- Starter code for both client and server:
-  - Basic project structure
-  - Configuration files
-  - Sample models and components
+## Features implemented
+
+- User registration and login (JWT)
+- Protected routes for creating/updating/deleting posts
+- Post CRUD with image upload (Multer)
+- Categories (create, list)
+- Comments (create, list, delete) — protected where appropriate
+- Post search, pagination, and category filter
+- Static serving of uploaded images (`/uploads`)
 
 ## Requirements
 
-- Node.js (v18 or higher)
-- MongoDB (local installation or Atlas account)
-- npm or yarn
-- Git
+- Node.js 16+ (or newer)
+- npm
+- MongoDB (Atlas or self-hosted)
 
-## Submission
+## Environment variables
 
-Your work will be automatically submitted when you push to your GitHub Classroom repository. Make sure to:
+Create a `.env` file in the `server/` folder with these variables:
 
-1. Complete both the client and server portions of the application
-2. Implement all required API endpoints
-3. Create the necessary React components and hooks
-4. Document your API and setup process in the README.md
-5. Include screenshots of your working application
+```
+PORT=5000
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/dbname?retryWrites=true&w=majority
+JWT_SECRET=<a-long-random-secret>
+NODE_ENV=development
+```
 
-## Resources
+Notes:
+- If using an Atlas SRV URI (`mongodb+srv://`), your network must allow DNS SRV/TXT lookups — see Troubleshooting below if you get DNS errors.
+- Do not commit `.env` to source control. Rotate credentials if they were exposed.
 
-- [MongoDB Documentation](https://docs.mongodb.com/)
-- [Express.js Documentation](https://expressjs.com/)
-- [React Documentation](https://react.dev/)
-- [Node.js Documentation](https://nodejs.org/en/docs/)
-- [Mongoose Documentation](https://mongoosejs.com/docs/) 
+## Setup (Windows / PowerShell)
+
+1) Server
+
+```powershell
+cd .\server
+npm install
+# create .env with the variables above
+npm start
+```
+
+2) Client
+
+```powershell
+cd .\client
+npm install
+npm run dev
+```
+
+Open the client URL printed by Vite (usually `http://localhost:5173`) and the server runs on `http://localhost:5000` by default.
+
+## API documentation
+
+Base URL (development): http://localhost:5000
+
+Authentication
+- All protected endpoints require an Authorization header:
+
+	Authorization: Bearer <JWT_TOKEN>
+
+Auth
+- POST /api/auth/register
+	- Body: { username, email, password }
+	- Success: 201
+	- Response: { token, user: { id, username, email } }
+
+- POST /api/auth/login
+	- Body: { email, password }
+	- Success: 200
+	- Response: { token, user: { id, username, email } }
+
+Categories
+- GET /api/categories
+	- Returns: [ { _id, name, createdAt, updatedAt } ]
+
+- POST /api/categories
+	- Body: { name }
+	- Protected: no (currently open)
+	- Response: 201 created category
+
+Posts
+- GET /api/posts
+	- Query params: page, limit, search, category
+	- Returns: { posts: [...], total, page, pages }
+
+- GET /api/posts/:id
+	- Returns single post with populated `author` and `category`
+
+- POST /api/posts
+	- Protected: yes (Authorization header)
+	- Content-Type: multipart/form-data
+	- Form fields: title, content, category, tags (comma-separated)
+	- File: image (optional)
+	- Response: 201 created post
+
+- PUT /api/posts/:id
+	- Protected: yes (only post author)
+	- Content-Type: multipart/form-data
+	- Can update title, content, category, tags, image
+
+- DELETE /api/posts/:id
+	- Protected: yes (only post author)
+	- Response: { message: 'Post deleted' }
+
+Comments (two flavors in the project)
+- POST /api/posts/:id/comments
+	- Add a comment to a post (this endpoint lives in `posts.js`) — Protected
+	- Body: { content }
+	- Returns: updated comments array for post
+
+- POST /api/comments/:postId
+	- Alternate comment creation route in `commentRoutes.js` (protected)
+	- Body: { content }
+
+- GET /api/comments/:postId
+	- Returns comments for a post (populated with author info)
+
+- DELETE /api/comments/:id
+	- Protected: yes (only comment author)
+
+File uploads
+- Images uploaded to posts are saved under `server/uploads/` and served statically at `/uploads/<filename>`.
+
+Example: create post with image using curl (replace token)
+
+```bash
+curl -X POST "http://localhost:5000/api/posts" \
+	-H "Authorization: Bearer <TOKEN>" \
+	-F "title=My Post" \
+	-F "content=Hello world" \
+	-F "category=<categoryId>" \
+	-F "image=@/path/to/photo.jpg"
+```
+
+Example: login (curl)
+
+```bash
+curl -X POST "http://localhost:5000/api/auth/login" -H "Content-Type: application/json" -d '{"email":"you@example.com","password":"password"}'
+```
+
+## Data shapes (contract)
+
+- User: { id, username, email }
+- Post: {
+	_id, title, content, category: { _id, name }, author: { _id, username, email }, image, createdAt, updatedAt
+}
+- Comment: { _id, post, author: { _id, username, email }, content, createdAt }
+
+Edge cases
+- Missing required fields return 400 with { message }
+- Unauthorized access returns 401 or 403 depending on the check
+- File uploads limited to images and 5MB
+
+
+## Screenshots
+
+Add screenshots to the repository under `client/public/screenshots/` or a top-level `screenshots/` folder. Use the following markdown in this README to display them (replace file names):
+
+![Home page](client/public/screenshots/home.png)
+![New Post](client/public/screenshots/new-post.png)
+
+If you prefer, commit your screenshot files and I'll embed them into the README for you.
+
+## Security & housekeeping
+
+- Rotate database credentials if they were ever pushed publicly.
+- Add `server/.env` to `.gitignore` (it likely already is) and consider adding `client/.env` if you add client secrets.
+- Use a limited-permission DB user for development.
+
+## Helpful commands
+
+- Run server: `cd server; npm start`
+- Run client: `cd client; npm run dev`
+- Quick DB connection test: `node server/testMongo.js` (uses `server/.env`)
+
+
+
+
